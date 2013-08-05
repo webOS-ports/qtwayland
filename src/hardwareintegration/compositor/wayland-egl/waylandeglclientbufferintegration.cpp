@@ -120,6 +120,8 @@ void WaylandEglClientBufferIntegration::initializeHardware(QtWayland::Display *w
     }
 
     d->egl_display = nativeInterface->nativeResourceForWindow("EglDisplay", m_compositor->window());
+    if (!d->egl_display)
+        d->egl_display = nativeInterface->nativeResourceForIntegration("EglDisplay");
     if (!d->egl_display) {
         qWarning("QtCompositor: Failed to initialize EGL display. Could not get EglDisplay for window.");
         return;
