@@ -9,4 +9,6 @@ qtHaveModule(quick) {
     SUBDIRS += custom-extension
 }
 
-SUBDIRS += server-buffer
+contains(QT_CONFIG, opengles2) {
+    SUBDIRS += server-buffer
+}
