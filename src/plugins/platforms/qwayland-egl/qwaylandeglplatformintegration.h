@@ -42,9 +42,12 @@
 #ifndef QWAYLANDEGLPLATFORMINTEGRATION_H
 #define QWAYLANDEGLPLATFORMINTEGRATION_H
 
+#include <QtGui/QOpenGLContext>
+
 #include <QtWaylandClient/private/qwaylandintegration_p.h>
 
 #include "qwaylandeglclientbufferintegration.h"
+#include "qwaylandglcontext.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -60,6 +63,16 @@ public:
 
     QWaylandEglClientBufferIntegration *clientBufferIntegration() const
     { return m_client_buffer_integration; }
+
+    void *nativeResourceForContext(const QByteArray& resourceString, QOpenGLContext *context)
+    {
+        QByteArray lowerCaseResource = resourceString.toLower();
+
+        if (lowerCaseResource == "eglcontext")
+            return static_cast<QWaylandGLContext*>(context->handle())->eglContext();
+
+        return NULL;
+    }
 
 private:
     QWaylandEglClientBufferIntegration *m_client_buffer_integration;
