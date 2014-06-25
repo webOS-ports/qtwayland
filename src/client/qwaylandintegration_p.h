@@ -94,6 +94,7 @@ public:
     virtual QWaylandClientBufferIntegration *clientBufferIntegration() const;
     virtual QWaylandServerBufferIntegration *serverBufferIntegration() const;
     virtual QWaylandShellIntegration *shellIntegration() const;
+    virtual void *nativeResourceForContext(const QByteArray &resourceString, QOpenGLContext *context) { return NULL; }
 protected:
     QWaylandClientBufferIntegration *mClientBufferIntegration;
     QWaylandServerBufferIntegration *mServerBufferIntegration;
