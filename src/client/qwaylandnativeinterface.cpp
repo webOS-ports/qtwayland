@@ -48,6 +48,7 @@
 #include "qwaylandwindowmanagerintegration_p.h"
 #include <QtGui/private/qguiapplication_p.h>
 #include <QtGui/QScreen>
+#include <QtGui/QOpenGLContext>
 
 QT_BEGIN_NAMESPACE
 
@@ -93,6 +94,11 @@ void *QWaylandNativeInterface::nativeResourceForScreen(const QByteArray &resourc
         return ((QWaylandScreen *) screen->handle())->output();
 
     return NULL;
+}
+
+void *QWaylandNativeInterface::nativeResourceForContext(const QByteArray &resourceString, QOpenGLContext *context)
+{
+    return m_integration->nativeResourceForContext(resourceString, context);
 }
 
 QVariantMap QWaylandNativeInterface::windowProperties(QPlatformWindow *window) const
