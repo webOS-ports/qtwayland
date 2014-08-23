@@ -255,6 +255,18 @@ SubSurface *Surface::subSurface() const
     return m_subSurface;
 }
 
+void Surface::setShellSurface(ShellSurface *shellSurface)
+{
+    m_shellSurface = shellSurface;
+    if (m_shellSurface)
+        emit m_waylandSurface->shellSurfaceReady();
+}
+
+ShellSurface *Surface::shellSurface() const
+{
+    return m_shellSurface;
+}
+
 void Surface::setInputPanelSurface(InputPanelSurface *inputPanelSurface)
 {
     m_inputPanelSurface = inputPanelSurface;

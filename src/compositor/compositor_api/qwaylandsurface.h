@@ -204,6 +204,7 @@ Q_SIGNALS:
     void contentOrientationChanged();
     void orientationUpdateMaskChanged();
     void extendedSurfaceReady();
+    void shellSurfaceReady();
     void classNameChanged();
     void titleChanged();
     void raiseRequested();
