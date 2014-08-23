@@ -299,6 +299,8 @@ SubSurface *Surface::subSurface() const
 void Surface::setShellSurface(ShellSurface *shellSurface)
 {
     m_shellSurface = shellSurface;
+    if (m_shellSurface)
+        emit m_waylandSurface->shellSurfaceReady();
 }
 
 ShellSurface *Surface::shellSurface() const
