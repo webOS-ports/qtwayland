@@ -22,6 +22,8 @@ public:
 
     wl_display *display() const;
 
+    void checkError() const;
+
 private slots:
     void readWaylandEvents();
 
@@ -29,6 +31,7 @@ private slots:
 
 signals:
     void newEventsRead();
+    void fatalError();
 
 private:
 

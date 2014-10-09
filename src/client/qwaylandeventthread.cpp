@@ -30,12 +30,28 @@ void QWaylandEventThread::displayConnect()
     QMetaObject::invokeMethod(this, "waylandDisplayConnect", Qt::QueuedConnection);
 }
 
+// ### be careful what you do, this function may also be called from other
+// threads to clean up & exit.
+void QWaylandEventThread::checkError() const
+{
+    int ecode = wl_display_get_error(m_display);
+    if ((ecode == EPIPE || ecode == ECONNRESET)) {
+        // special case this to provide a nicer error
+        qWarning("The Wayland connection broke. Did the Wayland compositor die?");
+    } else {
+        qErrnoWarning(ecode, "The Wayland connection experienced a fatal error");
+    }
+}
+
 void QWaylandEventThread::readWaylandEvents()
 {
-    if (wl_display_dispatch(m_display) == -1 && errno == EPIPE) {
-        qWarning("The Wayland connection broke. Did the Wayland compositor die?");
-        ::exit(1);
+    if (wl_display_dispatch(m_display) < 0) {
+        checkError();
+        m_readNotifier->setEnabled(false);
+        emit fatalError();
+        return;
     }
+
     emit newEventsRead();
 }
 
