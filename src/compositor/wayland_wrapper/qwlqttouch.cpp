@@ -104,7 +104,13 @@ bool TouchExtensionGlobal::postTouchEvent(QTouchEvent *event, QWaylandSurfaceVie
             uint32_t state = (tp.state() & 0xFFFF) | (sentPointCount << 16);
             uint32_t flags = (tp.flags() & 0xFFFF) | (int(event->device()->capabilities()) << 16);
 
+#if 0
             QPointF p = tp.pos() - surfacePos; // surface-relative
+#else
+            // Tofe: the position of the touchpoint is supposed to be relative to the widget that receives it.
+            //       here, it is the window --> no need to offset it once more
+            QPointF p = tp.pos(); // surface-relative
+#endif
             int x = toFixed(p.x());
             int y = toFixed(p.y());
             int nx = toFixed(tp.normalizedPos().x());
