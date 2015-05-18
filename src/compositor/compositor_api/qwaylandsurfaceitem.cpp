@@ -231,8 +231,8 @@ void QWaylandSurfaceItem::touchEvent(QTouchEvent *event)
 
         if (event->type() == QEvent::TouchBegin) {
             QQuickItem *grabber = window()->mouseGrabberItem();
-            if (grabber != this)
-                grabMouse();
+            //if (grabber != this)
+            //    grabMouse();
         }
 
         QPoint pointPos;
