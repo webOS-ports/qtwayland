@@ -229,8 +229,8 @@ void QWaylandSurfaceItem::touchEvent(QTouchEvent *event)
     if (m_touchEventsEnabled) {
         if (event->type() == QEvent::TouchBegin) {
             QQuickItem *grabber = window()->mouseGrabberItem();
-            if (grabber != this)
-                grabMouse();
+            //if (grabber != this)
+            //    grabMouse();
         }
 
         QWaylandInputDevice *inputDevice = compositor()->defaultInputDevice();
