@@ -106,7 +106,10 @@ ShellSurface::ShellSurface(Shell *shell, wl_client *client, uint32_t id, Surface
 
 ShellSurface::~ShellSurface()
 {
-    delete m_view;
+   QList<QWaylandSurfaceView *> surfaceViews = m_surface->waylandSurface()->views();
+   if( surfaceViews.indexOf(m_view) >= 0 ) {
+       delete m_view;
+   }
 }
 
 void ShellSurface::sendConfigure(uint32_t edges, int32_t width, int32_t height)
