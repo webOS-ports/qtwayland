@@ -54,12 +54,14 @@ QWaylandSurfaceInterface::QWaylandSurfaceInterface(QWaylandSurface *surface)
                    : d(new Private)
 {
     d->surface = surface;
+    d->surface->ref();
     surface->addInterface(this);
 }
 
 QWaylandSurfaceInterface::~QWaylandSurfaceInterface()
 {
     d->surface->removeInterface(this);
+    d->surface->destroy();
 }
 
 QWaylandSurface *QWaylandSurfaceInterface::surface() const
