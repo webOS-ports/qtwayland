@@ -63,8 +63,8 @@ QWaylandSurfaceView::~QWaylandSurfaceView()
         if (i->mouseFocus() == this)
             i->setMouseFocus(Q_NULLPTR, QPointF());
 
-        d->surface->destroy();
         d->surface->d_func()->views.removeOne(this);
+        d->surface->destroy();
     }
     delete d;
 }
