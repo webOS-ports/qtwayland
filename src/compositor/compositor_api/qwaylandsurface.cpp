@@ -148,6 +148,9 @@ QWaylandSurface::QWaylandSurface(QWaylandSurfacePrivate *dptr)
 QWaylandSurface::~QWaylandSurface()
 {
     Q_D(QWaylandSurface);
+    foreach (QWaylandSurfaceInterface *iface, d->interfaces) {
+        iface->destroyResource();
+    }
     d->interfaces.clear();
     delete d->m_attacher;
 }
