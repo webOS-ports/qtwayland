@@ -111,6 +111,12 @@ bool ExtendedSurface::runOperation(QWaylandSurfaceOp *op)
     return false;
 }
 
+void ExtendedSurface::destroyResource()
+{
+   wl_resource_destroy(resource()->handle);  // this will trigger the destruction of the ExtendedSurface
+}
+
+
 void ExtendedSurface::extended_surface_update_generic_property(Resource *resource,
                                                                const QString &name,
                                                                struct wl_array *value)
