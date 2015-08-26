@@ -114,6 +114,7 @@ protected:
     void setSurfaceClassName(const QString &name);
     void setSurfaceTitle(const QString &title);
 
+    virtual void destroyResource() = 0;
 private:
     class Private;
     Private *const d;

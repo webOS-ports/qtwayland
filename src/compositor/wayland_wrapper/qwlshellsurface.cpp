@@ -174,6 +174,11 @@ bool ShellSurface::runOperation(QWaylandSurfaceOp *op)
     return false;
 }
 
+void ShellSurface::destroyResource()
+{
+    wl_resource_destroy(resource()->handle);  // this will trigger the destruction of the ShellSurface
+}
+
 void ShellSurface::mapped()
 {
     if (m_surface->waylandSurface()->windowType() == QWaylandSurface::Popup) {

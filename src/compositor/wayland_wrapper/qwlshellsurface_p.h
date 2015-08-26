@@ -104,6 +104,7 @@ public:
 
 protected:
     bool runOperation(QWaylandSurfaceOp *op) Q_DECL_OVERRIDE;
+    void destroyResource() Q_DECL_OVERRIDE;
 
 private Q_SLOTS:
     void mapped();
