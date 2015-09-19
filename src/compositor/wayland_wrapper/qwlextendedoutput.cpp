@@ -59,7 +59,7 @@ void OutputExtensionGlobal::output_extension_get_extended_output(qt_output_exten
     OutputResource *output = static_cast<OutputResource *>(Output::Resource::fromResource(output_resource));
     Q_ASSERT(output->extendedOutput == 0);
 
-    ExtendedOutput *extendedOutput = static_cast<ExtendedOutput *>(qt_extended_output::add(resource->client(), id));
+    ExtendedOutput *extendedOutput = static_cast<ExtendedOutput *>(qt_extended_output::add(resource->client(), id, resource->version()));
 
     Q_ASSERT(!output->extendedOutput);
     output->extendedOutput = extendedOutput;
