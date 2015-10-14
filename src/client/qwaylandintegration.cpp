@@ -77,6 +77,22 @@ QT_BEGIN_NAMESPACE
 
 namespace QtWaylandClient {
 
+class WaylandLunaTheme: public QGenericUnixTheme
+{
+public:
+    virtual QVariant themeHint(ThemeHint hint) const
+    {
+        switch (hint) {
+        case QPlatformTheme::PasswordMaskDelay:
+            return int(1000);
+        case QPlatformTheme::PasswordMaskCharacter:
+            return QChar(0x2022);
+        default:
+            return QGenericUnixTheme::themeHint(hint);
+        }
+    }
+};
+
 class GenericWaylandTheme: public QGenericUnixTheme
 {
 public:
@@ -260,11 +276,13 @@ QWaylandDisplay *QWaylandIntegration::display() const
 
 QStringList QWaylandIntegration::themeNames() const
 {
-    return GenericWaylandTheme::themeNames();
+    return QStringList("wayland_luna");
 }
 
 QPlatformTheme *QWaylandIntegration::createPlatformTheme(const QString &name) const
 {
+    if (name == "wayland_luna")
+        return new WaylandLunaTheme;
     return GenericWaylandTheme::createUnixTheme(name);
 }
 
