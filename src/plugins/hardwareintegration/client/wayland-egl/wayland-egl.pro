@@ -1,3 +1,6 @@
+PLUGIN_TYPE = wayland-graphics-integration-client
+load(qt_plugin)
+
 QT += waylandclient-private
 
 include(../../../../hardwareintegration/client/wayland-egl/wayland-egl.pri)
@@ -7,5 +10,3 @@ OTHER_FILES += \
 
 SOURCES += main.cpp
 
-PLUGIN_TYPE = wayland-graphics-integration-client
-load(qt_plugin)

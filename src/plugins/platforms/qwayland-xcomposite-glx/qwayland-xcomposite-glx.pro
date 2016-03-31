@@ -1,3 +1,6 @@
+PLUGIN_TYPE = platforms
+load(qt_plugin)
+
 QT += waylandclient-private
 
 include(../../../hardwareintegration/client/xcomposite-glx/xcomposite-glx.pri)
@@ -9,6 +12,3 @@ SOURCES += \
 
 HEADERS += \
     qwaylandxcompositeglxplatformintegration.h
-
-PLUGIN_TYPE = platforms
-load(qt_plugin)

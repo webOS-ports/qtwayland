@@ -1,3 +1,6 @@
+PLUGIN_TYPE = platforms
+load(qt_plugin)
+
 QT += waylandclient-private
 
 OTHER_FILES += \
@@ -5,5 +8,3 @@ OTHER_FILES += \
 
 SOURCES += main.cpp
 
-PLUGIN_TYPE = platforms
-load(qt_plugin)
