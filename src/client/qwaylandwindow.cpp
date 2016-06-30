@@ -292,7 +292,7 @@ void QWaylandWindow::setVisible(bool visible)
                 if (parent) {
                     QWaylandWlShellSurface *wlshellSurface = qobject_cast<QWaylandWlShellSurface*>(mShellSurface);
                     if (wlshellSurface)
-                        wlshellSurface->setPopup(parent, mDisplay->lastInputDevice(), mDisplay->lastInputSerial());
+                        wlshellSurface->setPopup(parent, mDisplay->lastInputDevice()?:mDisplay->defaultInputDevice(), mDisplay->lastInputSerial());
                 }
             } else if (window()->type() == Qt::ToolTip) {
                 if (QWaylandWindow *parent = transientParent()) {
