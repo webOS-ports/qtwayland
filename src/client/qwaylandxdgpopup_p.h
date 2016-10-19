@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the config.tests of the Qt Toolkit.
@@ -31,8 +31,8 @@
 **
 ****************************************************************************/
 
-#ifndef QWAYLANDXDGSURFACE_H
-#define QWAYLANDXDGSURFACE_H
+#ifndef QWAYLANDXDGPOPUP_P_H
+#define QWAYLANDXDGPOPUP_P_H
 
 //
 //  W A R N I N G
@@ -44,9 +44,6 @@
 //
 // We mean it.
 //
-
-#include <QtCore/QSize>
-#include <QtCore/QMargins>
 
 #include <wayland-client.h>
 
@@ -61,71 +58,22 @@ class QWindow;
 namespace QtWaylandClient {
 
 class QWaylandWindow;
-class QWaylandInputDevice;
 class QWaylandExtendedSurface;
-class QWaylandXdgShell;
 
-class Q_WAYLAND_CLIENT_EXPORT QWaylandXdgSurface : public QWaylandShellSurface
-        , public QtWayland::xdg_surface
+class Q_WAYLAND_CLIENT_EXPORT QWaylandXdgPopup : public QWaylandShellSurface
+        , public QtWayland::xdg_popup
 {
     Q_OBJECT
 public:
-    QWaylandXdgSurface(QWaylandXdgShell *shell, QWaylandWindow *window);
-    virtual ~QWaylandXdgSurface();
-
-    using QtWayland::xdg_surface::resize;
-    void resize(QWaylandInputDevice *inputDevice, enum resize_edge edges);
-
-    void resize(QWaylandInputDevice *inputDevice, enum wl_shell_surface_resize edges) Q_DECL_OVERRIDE;
-
-    using QtWayland::xdg_surface::move;
-    void move(QWaylandInputDevice *inputDevice) Q_DECL_OVERRIDE;
-
-    void setTitle(const QString &title) Q_DECL_OVERRIDE;
-    void setAppId(const QString &appId) Q_DECL_OVERRIDE;
-
-    void raise() Q_DECL_OVERRIDE;
-    void lower() Q_DECL_OVERRIDE;
-    void setContentOrientationMask(Qt::ScreenOrientations orientation) Q_DECL_OVERRIDE;
-    void setWindowFlags(Qt::WindowFlags flags) Q_DECL_OVERRIDE;
-    void sendProperty(const QString &name, const QVariant &value) Q_DECL_OVERRIDE;
-
-    bool shellManagesActiveState() const Q_DECL_OVERRIDE { return true; }
-
-    bool isFullscreen() const { return m_fullscreen; }
-    bool isMaximized() const { return m_maximized; }
+    QWaylandXdgPopup(struct ::xdg_popup *popup, QWaylandWindow *window);
+    virtual ~QWaylandXdgPopup();
 
 private:
-    void setMaximized() Q_DECL_OVERRIDE;
-    void setFullscreen() Q_DECL_OVERRIDE;
-    void setNormal() Q_DECL_OVERRIDE;
-    void setMinimized() Q_DECL_OVERRIDE;
-
-    void setTopLevel() Q_DECL_OVERRIDE;
-    void updateTransientParent(QWindow *parent) Q_DECL_OVERRIDE;
-
-private:
-    QWaylandWindow *m_window;
-    QWaylandXdgShell* m_shell;
-    bool m_maximized;
-    bool m_minimized;
-    bool m_fullscreen;
-    bool m_active;
-    QSize m_normalSize;
-    QMargins m_margins;
     QWaylandExtendedSurface *m_extendedWindow;
-
-    void xdg_surface_configure(int32_t width,
-                               int32_t height,
-                               struct wl_array *states,
-                               uint32_t serial) Q_DECL_OVERRIDE;
-    void xdg_surface_close() Q_DECL_OVERRIDE;
-
-    friend class QWaylandWindow;
 };
 
 QT_END_NAMESPACE
 
 }
 
-#endif // QWAYLANDXDGSURFACE_H
+#endif // QWAYLANDXDGPOPUP_P_H

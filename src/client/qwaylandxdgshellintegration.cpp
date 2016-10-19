@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -31,51 +31,37 @@
 **
 ****************************************************************************/
 
-#ifndef QWAYLANDCLIPBOARD_H
-#define QWAYLANDCLIPBOARD_H
+#include "qwaylandxdgshellintegration_p.h"
 
-//
-//  W A R N I N G
-//  -------------
-//
-// This file is not part of the Qt API.  It exists purely as an
-// implementation detail.  This header file may change from version to
-// version without notice, or even be removed.
-//
-// We mean it.
-//
-
-#include <qpa/qplatformclipboard.h>
-#include <QtCore/QVariant>
-#include <QtCore/QMimeData>
-
-#include <QtWaylandClient/private/qwaylandclientexport_p.h>
+#include <QtWaylandClient/private/qwaylandwindow_p.h>
+#include <QtWaylandClient/private/qwaylanddisplay_p.h>
+#include <QtWaylandClient/private/qwaylandxdgsurface_p.h>
+#include <QtWaylandClient/private/qwaylandxdgpopup_p.h>
+#include <QtWaylandClient/private/qwaylandxdgshell_p.h>
 
 QT_BEGIN_NAMESPACE
 
 namespace QtWaylandClient {
 
-class QWaylandDisplay;
-
-class Q_WAYLAND_CLIENT_EXPORT QWaylandClipboard : public QPlatformClipboard
+QWaylandXdgShellIntegration::QWaylandXdgShellIntegration(QWaylandDisplay *display)
+    : m_xdgShell(Q_NULLPTR)
 {
-public:
-    QWaylandClipboard(QWaylandDisplay *display);
+    Q_FOREACH (QWaylandDisplay::RegistryGlobal global, display->globals()) {
+        if (global.interface == QLatin1String("xdg_shell")) {
+            m_xdgShell = new QWaylandXdgShell(display->wl_registry(), global.id);
+            break;
+        }
+    }
+}
 
-    ~QWaylandClipboard();
-
-    QMimeData *mimeData(QClipboard::Mode mode = QClipboard::Clipboard) Q_DECL_OVERRIDE;
-    void setMimeData(QMimeData *data, QClipboard::Mode mode = QClipboard::Clipboard) Q_DECL_OVERRIDE;
-    bool supportsMode(QClipboard::Mode mode) const Q_DECL_OVERRIDE;
-    bool ownsMode(QClipboard::Mode mode) const Q_DECL_OVERRIDE;
-
-private:
-    QWaylandDisplay *mDisplay;
-    QMimeData m_emptyData;
-};
+QWaylandShellSurface *QWaylandXdgShellIntegration::createShellSurface(QWaylandWindow *window)
+{
+    if (window->window()->type() == Qt::WindowType::Popup)
+        return m_xdgShell->createXdgPopup(window);
+    else
+        return m_xdgShell->createXdgSurface(window);
+}
 
 }
 
 QT_END_NAMESPACE
-
-#endif // QWAYLANDCLIPBOARD_H

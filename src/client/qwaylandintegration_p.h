@@ -88,7 +88,9 @@ public:
 
     QVariant styleHint(StyleHint hint) const Q_DECL_OVERRIDE;
 
+#ifndef QT_NO_ACCESSIBILITY
     QPlatformAccessibility *accessibility() const Q_DECL_OVERRIDE;
+#endif
 
     QPlatformServices *services() const Q_DECL_OVERRIDE;
 
@@ -115,6 +117,7 @@ private:
     void initializeServerBufferIntegration();
     void initializeShellIntegration();
     void initializeInputDeviceIntegration();
+    QWaylandShellIntegration *createShellIntegration(const QString& interfaceName);
 
     QPlatformFontDatabase *mFontDb;
     QPlatformClipboard *mClipboard;
@@ -122,7 +125,9 @@ private:
     QWaylandDisplay *mDisplay;
     QPlatformNativeInterface *mNativeInterface;
     QScopedPointer<QPlatformInputContext> mInputContext;
+#ifndef QT_NO_ACCESSIBILITY
     QPlatformAccessibility *mAccessibility;
+#endif
     bool mClientBufferIntegrationInitialized;
     bool mServerBufferIntegrationInitialized;
     bool mShellIntegrationInitialized;
