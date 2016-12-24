@@ -131,9 +131,9 @@ public:
     QList<QWaylandInputDevice *> inputDevices() const { return mInputDevices; }
     QWaylandInputDevice *defaultInputDevice() const;
     QWaylandInputDevice *currentInputDevice() const { return defaultInputDevice(); }
-
+#ifndef QT_NO_DRAGANDDROP
     QWaylandDataDeviceManager *dndSelectionHandler() const { return mDndSelectionHandler.data(); }
-
+#endif
     QtWayland::qt_surface_extension *windowExtension() const { return mWindowExtension.data(); }
     QWaylandTouchExtension *touchExtension() const { return mTouchExtension.data(); }
     QtWayland::wl_text_input_manager *textInputManager() const { return mTextInputManager.data(); }
@@ -170,6 +170,7 @@ public:
     void handleWindowActivated(QWaylandWindow *window);
     void handleWindowDeactivated(QWaylandWindow *window);
     void handleKeyboardFocusChanged(QWaylandInputDevice *inputDevice);
+    void handleWindowDestroyed(QWaylandWindow *window);
 
 public slots:
     void blockingReadEvents();
@@ -195,7 +196,9 @@ private:
     QList<QWaylandInputDevice *> mInputDevices;
     QList<Listener> mRegistryListeners;
     QWaylandIntegration *mWaylandIntegration;
+#ifndef QT_NO_DRAGANDDROP
     QScopedPointer<QWaylandDataDeviceManager> mDndSelectionHandler;
+#endif
     QScopedPointer<QtWayland::qt_surface_extension> mWindowExtension;
     QScopedPointer<QtWayland::wl_subcompositor> mSubCompositor;
     QScopedPointer<QWaylandTouchExtension> mTouchExtension;
@@ -211,7 +214,7 @@ private:
     uint32_t mLastInputSerial;
     QWaylandInputDevice *mLastInputDevice;
     QPointer<QWaylandWindow> mLastInputWindow;
-    QWaylandWindow *mLastKeyboardFocus;
+    QPointer<QWaylandWindow> mLastKeyboardFocus;
     QVector<QWaylandWindow *> mActiveWindows;
     struct wl_callback *mSyncCallback;
     static const wl_callback_listener syncCallbackListener;
