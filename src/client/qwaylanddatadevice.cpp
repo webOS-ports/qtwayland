@@ -55,7 +55,7 @@
 #include <qpa/qplatformdrag.h>
 #include <qpa/qwindowsysteminterface.h>
 
-#include <QDebug>
+#ifndef QT_NO_DRAGANDDROP
 
 QT_BEGIN_NAMESPACE
 
@@ -109,7 +109,10 @@ void QWaylandDataDevice::startDrag(QMimeData *mimeData, QWaylandWindow *icon)
 {
     m_dragSource.reset(new QWaylandDataSource(m_display->dndSelectionHandler(), mimeData));
     connect(m_dragSource.data(), &QWaylandDataSource::cancelled, this, &QWaylandDataDevice::dragSourceCancelled);
+
     QWaylandWindow *origin = m_display->currentInputDevice()->pointerFocus();
+    if (!origin)
+        origin = m_display->currentInputDevice()->touchFocus();
 
     start_drag(m_dragSource->object(), origin->object(), icon->object(), m_display->currentInputDevice()->serial());
 }
@@ -127,8 +130,6 @@ void QWaylandDataDevice::data_device_data_offer(struct ::wl_data_offer *id)
 void QWaylandDataDevice::data_device_drop()
 {
     QDrag *drag = static_cast<QWaylandDrag *>(QGuiApplicationPrivate::platformIntegration()->drag())->currentDrag();
-
-    qDebug() << Q_FUNC_INFO << drag << m_dragOffer.data();
 
     QMimeData *dragData = 0;
     Qt::DropActions supportedActions;
@@ -255,3 +256,5 @@ void QWaylandDataDevice::dragSourceTargetChanged(const QString &mimeType)
 }
 
 QT_END_NAMESPACE
+
+#endif // QT_NO_DRAGANDDROP

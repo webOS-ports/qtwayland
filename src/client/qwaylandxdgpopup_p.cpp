@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -31,66 +31,31 @@
 **
 ****************************************************************************/
 
-#include "qwaylanddatasource_p.h"
-#include "qwaylanddataoffer_p.h"
-#include "qwaylanddatadevicemanager_p.h"
-#include "qwaylandinputdevice_p.h"
-#include "qwaylandmimehelper.h"
+#include "qwaylandxdgpopup_p.h"
 
-#include <QtCore/QFile>
-
-#include <QtCore/QDebug>
-
-#include <unistd.h>
-
-#ifndef QT_NO_DRAGANDDROP
+#include "qwaylandwindow_p.h"
+#include "qwaylanddisplay_p.h"
+#include "qwaylandextendedsurface_p.h"
 
 QT_BEGIN_NAMESPACE
 
 namespace QtWaylandClient {
 
-QWaylandDataSource::QWaylandDataSource(QWaylandDataDeviceManager *dataDeviceManager, QMimeData *mimeData)
-    : QtWayland::wl_data_source(dataDeviceManager->create_data_source())
-    , m_mime_data(mimeData)
+QWaylandXdgPopup::QWaylandXdgPopup(struct ::xdg_popup *popup, QWaylandWindow *window)
+    : QWaylandShellSurface(window)
+    , QtWayland::xdg_popup(popup)
+    , m_extendedWindow(nullptr)
 {
-    if (!mimeData)
-        return;
-    Q_FOREACH (const QString &format, mimeData->formats()) {
-        offer(format);
-    }
+    if (window->display()->windowExtension())
+        m_extendedWindow = new QWaylandExtendedSurface(window);
 }
 
-QWaylandDataSource::~QWaylandDataSource()
+QWaylandXdgPopup::~QWaylandXdgPopup()
 {
-    destroy();
-}
-
-QMimeData * QWaylandDataSource::mimeData() const
-{
-    return m_mime_data;
-}
-
-void QWaylandDataSource::data_source_cancelled()
-{
-    Q_EMIT cancelled();
-}
-
-void QWaylandDataSource::data_source_send(const QString &mime_type, int32_t fd)
-{
-    QByteArray content = QWaylandMimeHelper::getByteArray(m_mime_data, mime_type);
-    if (!content.isEmpty()) {
-        write(fd, content.constData(), content.size());
-    }
-    close(fd);
-}
-
-void QWaylandDataSource::data_source_target(const QString &mime_type)
-{
-    Q_EMIT targetChanged(mime_type);
+    xdg_popup_destroy(object());
+    delete m_extendedWindow;
 }
 
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_DRAGANDDROP

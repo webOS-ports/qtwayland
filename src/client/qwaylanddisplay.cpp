@@ -77,16 +77,8 @@ struct wl_surface *QWaylandDisplay::createSurface(void *handle)
 
 QWaylandShellSurface *QWaylandDisplay::createShellSurface(QWaylandWindow *window)
 {
-    if (mWaylandIntegration->shellIntegration())
-        return mWaylandIntegration->shellIntegration()->createShellSurface(window);
-
-    if (shellXdg()) {
-        return new QWaylandXdgSurface(shellXdg()->get_xdg_surface(window->object()), window);
-    } else if (shell()) {
-        return new QWaylandWlShellSurface(shell()->get_shell_surface(window->object()), window);
-    }
-
-    return Q_NULLPTR;
+    Q_ASSERT(mWaylandIntegration->shellIntegration());
+    return mWaylandIntegration->shellIntegration()->createShellSurface(window);
 }
 
 struct ::wl_region *QWaylandDisplay::createRegion(const QRegion &qregion)
@@ -120,7 +112,9 @@ QWaylandWindowManagerIntegration *QWaylandDisplay::windowManagerIntegration() co
 
 QWaylandDisplay::QWaylandDisplay(QWaylandIntegration *waylandIntegration)
     : mWaylandIntegration(waylandIntegration)
+#ifndef QT_NO_DRAGANDDROP
     , mDndSelectionHandler(0)
+#endif
     , mWindowExtension(0)
     , mSubCompositor(0)
     , mTouchExtension(0)
@@ -158,7 +152,9 @@ QWaylandDisplay::~QWaylandDisplay(void)
         mWaylandIntegration->destroyScreen(screen);
     }
     mScreens.clear();
+#ifndef QT_NO_DRAGANDDROP
     delete mDndSelectionHandler.take();
+#endif
     wl_display_disconnect(mDisplay);
 }
 
@@ -248,16 +244,13 @@ void QWaylandDisplay::registry_global(uint32_t id, const QString &interface, uin
         mCompositor.init(registry, id, mCompositorVersion);
     } else if (interface == QStringLiteral("wl_shm")) {
         mShm = static_cast<struct wl_shm *>(wl_registry_bind(registry, id, &wl_shm_interface,1));
-    } else if (interface == QStringLiteral("xdg_shell")
-               && qEnvironmentVariableIsSet("QT_WAYLAND_USE_XDG_SHELL")) {
-        mShellXdg.reset(new QWaylandXdgShell(registry,id));
-    } else if (interface == QStringLiteral("wl_shell")){
-        mShell.reset(new QtWayland::wl_shell(registry, id, 1));
     } else if (interface == QStringLiteral("wl_seat")) {
         QWaylandInputDevice *inputDevice = mWaylandIntegration->createInputDevice(this, version, id);
         mInputDevices.append(inputDevice);
+#ifndef QT_NO_DRAGANDDROP
     } else if (interface == QStringLiteral("wl_data_device_manager")) {
         mDndSelectionHandler.reset(new QWaylandDataDeviceManager(this, id));
+#endif
     } else if (interface == QStringLiteral("qt_surface_extension")) {
         mWindowExtension.reset(new QtWayland::qt_surface_extension(registry, id, 1));
     } else if (interface == QStringLiteral("wl_subcompositor")) {
@@ -299,6 +292,15 @@ void QWaylandDisplay::registry_global_remove(uint32_t id)
             break;
         }
     }
+}
+
+bool QWaylandDisplay::hasRegistryGlobal(const QString &interfaceName)
+{
+    Q_FOREACH (const RegistryGlobal &global, mGlobals)
+        if (global.interface == interfaceName)
+            return true;
+
+    return false;
 }
 
 void QWaylandDisplay::addRegistryListener(RegistryListener listener, void *data)
@@ -356,11 +358,6 @@ void QWaylandDisplay::forceRoundTrip()
         wl_callback_destroy(callback);
 }
 
-QtWayland::xdg_shell *QWaylandDisplay::shellXdg()
-{
-    return mShellXdg.data();
-}
-
 bool QWaylandDisplay::supportsWindowDecoration() const
 {
     static bool disabled = qgetenv("QT_WAYLAND_DISABLE_WINDOWDECORATION").toInt();
@@ -383,12 +380,6 @@ void QWaylandDisplay::setLastInputDevice(QWaylandInputDevice *device, uint32_t s
     mLastInputDevice = device;
     mLastInputSerial = serial;
     mLastInputWindow = win;
-}
-
-bool QWaylandDisplay::shellManagesActiveState() const
-{
-    //TODO: This should be part of a shell interface used by the shell protocol implementations
-    return mShellXdg;
 }
 
 void QWaylandDisplay::handleWindowActivated(QWaylandWindow *window)
@@ -414,13 +405,22 @@ void QWaylandDisplay::handleKeyboardFocusChanged(QWaylandInputDevice *inputDevic
 {
     QWaylandWindow *keyboardFocus = inputDevice->keyboardFocus();
 
-    if (!shellManagesActiveState() && mLastKeyboardFocus != keyboardFocus) {
-        if (keyboardFocus)
-            handleWindowActivated(keyboardFocus);
-        if (mLastKeyboardFocus)
-            handleWindowDeactivated(mLastKeyboardFocus);
-    }
-    mLastKeyboardFocus = inputDevice->keyboardFocus();
+    if (mLastKeyboardFocus == keyboardFocus)
+        return;
+
+    if (keyboardFocus && !keyboardFocus->shellManagesActiveState())
+        handleWindowActivated(keyboardFocus);
+
+    if (mLastKeyboardFocus && !mLastKeyboardFocus->shellManagesActiveState())
+        handleWindowDeactivated(mLastKeyboardFocus);
+
+    mLastKeyboardFocus = keyboardFocus;
+}
+
+void QWaylandDisplay::handleWindowDestroyed(QWaylandWindow *window)
+{
+    if (mActiveWindows.contains(window))
+        handleWindowDeactivated(window);
 }
 
 void QWaylandDisplay::handleWaylandSync()

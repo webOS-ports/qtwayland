@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -31,66 +31,42 @@
 **
 ****************************************************************************/
 
-#include "qwaylanddatasource_p.h"
-#include "qwaylanddataoffer_p.h"
-#include "qwaylanddatadevicemanager_p.h"
-#include "qwaylandinputdevice_p.h"
-#include "qwaylandmimehelper.h"
+#ifndef QWAYLANDWLSHELLINTEGRATION_P_H
+#define QWAYLANDWLSHELLINTEGRATION_P_H
 
-#include <QtCore/QFile>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
-#include <QtCore/QDebug>
+#include <wayland-client.h>
+#include <private/qwayland-wayland.h>
 
-#include <unistd.h>
-
-#ifndef QT_NO_DRAGANDDROP
+#include <QtWaylandClient/private/qwaylandshellintegration_p.h>
 
 QT_BEGIN_NAMESPACE
 
 namespace QtWaylandClient {
 
-QWaylandDataSource::QWaylandDataSource(QWaylandDataDeviceManager *dataDeviceManager, QMimeData *mimeData)
-    : QtWayland::wl_data_source(dataDeviceManager->create_data_source())
-    , m_mime_data(mimeData)
+class Q_WAYLAND_CLIENT_EXPORT QWaylandWlShellIntegration : public QWaylandShellIntegration
 {
-    if (!mimeData)
-        return;
-    Q_FOREACH (const QString &format, mimeData->formats()) {
-        offer(format);
-    }
-}
+public:
+    QWaylandWlShellIntegration(QWaylandDisplay* display);
+    bool initialize(QWaylandDisplay *) Q_DECL_OVERRIDE { return m_wlShell != Q_NULLPTR; }
+    QWaylandShellSurface *createShellSurface(QWaylandWindow *window) Q_DECL_OVERRIDE;
 
-QWaylandDataSource::~QWaylandDataSource()
-{
-    destroy();
-}
-
-QMimeData * QWaylandDataSource::mimeData() const
-{
-    return m_mime_data;
-}
-
-void QWaylandDataSource::data_source_cancelled()
-{
-    Q_EMIT cancelled();
-}
-
-void QWaylandDataSource::data_source_send(const QString &mime_type, int32_t fd)
-{
-    QByteArray content = QWaylandMimeHelper::getByteArray(m_mime_data, mime_type);
-    if (!content.isEmpty()) {
-        write(fd, content.constData(), content.size());
-    }
-    close(fd);
-}
-
-void QWaylandDataSource::data_source_target(const QString &mime_type)
-{
-    Q_EMIT targetChanged(mime_type);
-}
+private:
+    QtWayland::wl_shell *m_wlShell;
+};
 
 }
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_DRAGANDDROP
+#endif // QWAYLANDWLSHELLINTEGRATION_P_H

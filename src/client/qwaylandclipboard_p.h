@@ -47,9 +47,11 @@
 
 #include <qpa/qplatformclipboard.h>
 #include <QtCore/QVariant>
+#include <QtCore/QMimeData>
 
 #include <QtWaylandClient/private/qwaylandclientexport_p.h>
 
+#ifndef QT_NO_DRAGANDDROP
 QT_BEGIN_NAMESPACE
 
 namespace QtWaylandClient {
@@ -70,10 +72,13 @@ public:
 
 private:
     QWaylandDisplay *mDisplay;
+    QMimeData m_emptyData;
 };
 
 }
 
 QT_END_NAMESPACE
+
+#endif // QT_NO_DRAGANDDROP
 
 #endif // QWAYLANDCLIPBOARD_H
